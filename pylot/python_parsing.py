@@ -40,9 +40,15 @@ def function_signature_to_dict(func):
 
     args = []
     kwargs = []
+    has_var_positional = False  # Flag for *args
+    has_var_keyword = False  # Flag for **kwargs
 
     for name, param in params.items():
-        if param.default == inspect.Parameter.empty:
+        if param.kind == inspect.Parameter.VAR_POSITIONAL:
+            has_var_positional = True
+        elif param.kind == inspect.Parameter.VAR_KEYWORD:
+            has_var_keyword = True
+        elif param.default == inspect.Parameter.empty:
             arg = {'name': name}
             for doc_param in doc.params:
                 if doc_param.arg_name == name:
@@ -69,8 +75,11 @@ def function_signature_to_dict(func):
         'name': func.__name__,
         'description': doc.short_description,
         'args': args,
-        'kwargs': kwargs
+        'kwargs': kwargs,
+        'has_var_positional': has_var_positional,
+        'has_var_keyword': has_var_keyword
     }
+
 
 
 class CodeVisitor(ast.NodeVisitor):
